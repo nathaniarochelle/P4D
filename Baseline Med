@@ -80,3 +80,19 @@ patcodedclas <- patcoded %>%
 +         any_category_yn   = if_else(is_antidepressiva | is_sleepmed, "Yes", "No")
 +     ) %>%
 +     select(-.med_norm)
+
+4. Filter based on baseline + combine 
+baseline <- patcodedclas |>
++ filter(.data[["studyeventoid"]] == "e.mzp1")
+
+
+baseline_comb <- baseline |>
+  group_by(supplementalid) |>
+  summarise(
+    meds = med_name |> unique() |> sort() |> str_c(collapse = "; "),
+    any_antidepressiva = any(is_antidepressiva, na.rm = TRUE),
+    any_sleepmed = any(is_sleepmed, na.rm = TRUE),
+    .groups = "drop"
+  )
+write_xlsx(baseline_comb,
++            path = "D:/SDD/4_Forschungszentrum/P4D/6 - Data Export Set.xlsx")
