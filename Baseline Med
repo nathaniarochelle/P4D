@@ -1,46 +1,71 @@
 1. Import and clean 
-medrep <- medrep_ent %>% 
+med_yn25 <- med_yn25 %>%
++     mutate(
++         # ---- IDs & keys (must match exactly for joins) ----
++         supplementalid       = str_trim(as.character(supplementalid)),
++         studyeventoid        = str_trim(as.character(studyeventoid)),
++         studyeventrepeatkey  = str_trim(as.character(studyeventrepeatkey)),
++         formoid              = str_trim(as.character(formoid)),
++         formrepeatkey        = str_trim(as.character(formrepeatkey)),
++         itemgroupoid         = str_trim(as.character(itemgroupoid)),
++         itemgrouprepeatkey   = str_trim(as.character(itemgrouprepeatkey)),
++         itemgrouppk          = str_trim(as.character(itemgrouppk)),
++         subjectkey           = str_trim(as.character(subjectkey)),
++         
++         # ---- Dates ----
++         md_dt      = as_date(md_dt),
++         arc_md_dt  = as_date(arc_md_dt),
++         
++         # ---- Yes / No medication flag ----
++         md_yn = case_when(
++             md_yn %in% c("Y", "YES", "Yes", "yes", "1") ~ "Y",
++             md_yn %in% c("N", "NO", "No", "no", "0")    ~ "N",
++             TRUE                                       ~ NA_character_
++         )
++     )
+
+> med_rep25 <- med_rep25 %>%
 +     mutate(
 +         # IDs as character
-+         supplementalid       = as.character(supplementalid),
-+         studyeventoid        = as.character(studyeventoid),
-+         studyeventrepeatkey  = as.character(studyeventrepeatkey),
-+         formoid              = as.character(formoid),
-+         formrepeatkey        = as.character(formrepeatkey),
-+         itemgroupoid         = as.character(itemgroupoid),
-+         itemgrouprepeatkey   = as.character(itemgrouprepeatkey),
-+         itemgrouppk          = as.character(itemgrouppk),
-+         subjectkey           = as.character(subjectkey),
++         supplementalid      = as.character(supplementalid),
++         studyeventoid       = as.character(studyeventoid),
++         studyeventrepeatkey = as.character(studyeventrepeatkey),
++         formoid             = as.character(formoid),
++         formrepeatkey       = as.character(formrepeatkey),
++         itemgroupoid        = as.character(itemgroupoid),
++         itemgrouprepeatkey  = as.character(itemgrouprepeatkey),
++         itemgrouppk         = as.character(itemgrouppk),
++         subjectkey          = as.character(subjectkey),
 +         
 +         # Medication name: trim spaces
-+         md_name              = str_squish(md_name),
++         md_name             = str_squish(md_name),
 +         
 +         # Dose and units: numeric where possible
-+         md_dose              = as.numeric(md_dose),
-+         arc_md_dose          = as.numeric(arc_md_dose),
-+         md_unit              = str_squish(md_unit),
-+         arc_md_unit          = str_squish(arc_md_unit),
++         md_dose             = as.numeric(md_dose),
++         arc_md_dose         = as.numeric(arc_md_dose),
++         md_unit             = str_squish(md_unit),
++         arc_md_unit         = str_squish(arc_md_unit),
 +         
-+         # Application and frequency: trim spaces
-+         md_appli             = str_squish(md_appli),
-+         md_daily             = as.numeric(md_daily),
-+         md_inter             = as.numeric(md_inter),
-+         arc_md_inter         = as.numeric(arc_md_inter),
++         # Application and frequency
++         md_appli            = str_squish(md_appli),
++         md_daily            = as.numeric(md_daily),
++         md_inter            = as.numeric(md_inter),
++         arc_md_inter        = as.numeric(arc_md_inter),
 +         
-+         # TDM values: numeric
-+         md_tdmw              = as.numeric(md_tdmw),
-+         mu_md_tdmw           = str_squish(mu_md_tdmw),
-+         arc_md_tdmw          = as.numeric(arc_md_tdmw),
++         # TDM values
++         md_tdmw             = as.numeric(md_tdmw),
++         mu_md_tdmw          = str_squish(mu_md_tdmw),
++         arc_md_tdmw         = as.numeric(arc_md_tdmw),
 +         
-+         md_tdmm              = as.numeric(md_tdmm),
-+         mu_md_tdmm           = str_squish(mu_md_tdmm),
-+         arc_md_tdmm          = as.numeric(arc_md_tdmm),
++         md_tdmm             = as.numeric(md_tdmm),
++         mu_md_tdmm          = str_squish(mu_md_tdmm),
++         arc_md_tdmm         = as.numeric(arc_md_tdmm),
 +         
-+         md_tdmsu             = as.numeric(md_tdmsu),
-+         mu_md_tdmsu          = str_squish(mu_md_tdmsu),
-+         arc_md_tdmsu         = as.numeric(arc_md_tdmsu),
++         md_tdmsu            = as.numeric(md_tdmsu),
++         mu_md_tdmsu         = str_squish(mu_md_tdmsu),
++         arc_md_tdmsu        = as.numeric(arc_md_tdmsu),
 +         
-+         md_tdmb              = as.numeric(md_tdmb)
++         md_tdmb             = as.numeric(md_tdmb)
 +     )
 
 decode <- med_decode %>%
@@ -53,47 +78,84 @@ decode <- med_decode %>%
 +     distinct(med_code, .keep_all = TRUE)
 
 2. Merge + Decode 
-patcoded <- medrep %>%
+med_rep25 <- med_rep25 %>%
 +     left_join(decode, by = c("md_name" = "med_code"))
 
-3. Medication classification
-antidep_names <- c("Agomelatin","Amitriptylin","Bupropion","Citalopram","Clomipramin",
-+     "Desvenlafaxin","Doxepin","Duloxetin","Escitalopram","Esketamin",
-+     "Fluoxetin","Fluvoxamin","Johanniskraut","Milnacipran","Mirtazapin",
-+     "Moclobemid","Opipramol","Paroxetin","Sertralin","Tianeptin",
-+     "Tranylcypromin","Trazodon","Trimipramin","Venlafaxin")
+med_comb25 <- med_yn25 %>%
++     left_join(med_rep25,
++         by = c("supplementalid", "studyeventoid"))
 
-sleepmed_names <- c(
-+     "Amitriptylin","Baldrianwurzel","Baldrianwurzel, Kombinationen","Clonazepam",
-+     "Daridorexant","Diazepam","Doxepin","Eszopiclon","Lavendelöl","Levomepromazin",
-+     "Lorazepam","Loxapin","Melatonin","Melperon","Mirtazapin","Pipamperon",
-+     "Promethazin","Prothipendyl","Quetiapin","Temazepam","Trazodon",
-+     "Zolpidem","Zopiclon
+3. Define excluded medication
+ AD_SM <- c(
++     "Sertralin",
++     "Trimipramin",
++     "Venlafaxin",
++     "Trazodon",
++     "Amitriptylin",
++     "Duloxetin",
++     "Fluvoxamin",
++     "Agomelatin",
++     "Milnacipran",
++     "Bupropion",
++     "Desvenlafaxin",
++     "Escitalopram",
++     "Esketamin",
++     "Doxepin",
++     "Fluoxetin",
++     "Clomipramin",
++     "Tranylcypromin",
++     "Citalopram",
++     "Tianeptin",
++     "Moclobemid",
++     "Opipramol",
++     "Johanniskraut",
++     "Paroxetin",
++     "Mirtazapin",
++     "Lorazepam",
++     "Quetiapin",
++     "Lavendelöl",
++     "Pipamperon",
++     "Melperon",
++     "Promethazin",
++     "Diazepam",
++     "Eszopiclon",
++     "Daridorexant",
++     "Levomepromazin",
++     "Melatonin",
++     "Baldrianwurzel",
++     "Zopiclon",
++     "Loxapin",
++     "Temazepam",
++     "Baldrianwurzel, Kombinationen",
++     "Clonazepam",
++     "Prothipendyl",
++     "Zolpidem")
 
-patcodedclas <- patcoded %>%
-+     mutate(
-+         .med_norm = toupper(str_squish(as.character(med_name))),
-+         is_antidepressiva = .med_norm %in% toupper(antidep_names),
-+         is_sleepmed       = .med_norm %in% toupper(sleepmed_names),
-+         antidepressiva_yn = if_else(is_antidepressiva, "Yes", "No"),
-+         sleepmed_yn       = if_else(is_sleepmed,       "Yes", "No"),
-+         any_category_yn   = if_else(is_antidepressiva | is_sleepmed, "Yes", "No")
-+     ) %>%
-+     select(-.med_norm)
-
-4. Filter based on baseline + combine 
-baseline <- patcodedclas |>
-+ filter(.data[["studyeventoid"]] == "e.mzp1")
-
-
- baseline_comb1 <- baseline |>
-+     group_by(supplementalid) |>
+4. Decide eligibility at baseline only
+incl_baseline <- med_comb25 %>%
++     filter(studyeventoid == "e.mzp1") %>%
++     group_by(supplementalid) %>%
 +     summarise(
-+         meds = med_name |> unique() |> sort() |> str_c(collapse = "; "),
-+         any_antidepressiva = any(is_antidepressiva, na.rm = TRUE),
-+         any_sleepmed = any(is_sleepmed, na.rm = TRUE),
-+         any_category_yn = any(is_antidepressiva | is_sleepmed, na.rm = TRUE),
++         eligible =
++             all(is.na(med_name)) |
++             !any(med_name %in% AD_SM, na.rm = TRUE),
 +         .groups = "drop"
-+     )
-write_xlsx(baseline_comb,
-+            path = "D:/SDD/4_Forschungszentrum/P4D/6 - Data Export Set.xlsx")
++     ) %>%
++     filter(eligible) %>%
++     pull(supplementalid)
+
+print (incl_baseline)
+
+5. Apply eligbility to full dataset 
+
+incl_analysis <- med_comb25 %>%
++     filter(supplementalid %in% incl_baseline)
+
+6. Sanity checks
+
+n_distinct(med_comb25$supplementalid)
+[1] 589
+> n_distinct(incl_analysis$supplementalid)
+[1] 94
+
+
