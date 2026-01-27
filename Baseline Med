@@ -158,4 +158,36 @@ n_distinct(med_comb25$supplementalid)
 > n_distinct(incl_analysis$supplementalid)
 [1] 94
 
+------------ Filtering for patients with antidepressant treatment 
 
+AD <- c(
++     "Agomelatin",
++     "Amitriptylin",
++     "Bupropion",
++     "Citalopram",
++     "Clomipramin",
++     "Desvenlafaxin",
++     "Doxepin",
++     "Duloxetin",
++     "Escitalopram",
++     "Esketamin",
++     "Fluoxetin",
++     "Fluvoxamin",
++     "Johanniskraut",
++     "Lithium",
++     "Mirtazapin",
++     "Milnacipran",
++     "Moclobemid",
++     "Opipramol",
++     "Paroxetin",
++     "Sertralin",
++     "Tianeptin",
++     "Tranylcypromin",
++     "Trimipramin",
++     "Trazodon",
++     "Venlafaxin"
+
+included_ids <- incl_analysis1 %>%
+filter(studyeventoid %in% c("e.mzp2", "e.mzp3", "e.mzp4", "e.mzp5", "e.mzp6", "e.mzp7"),
+is_antidepressant) %>%
+distinct(supplementalid)
