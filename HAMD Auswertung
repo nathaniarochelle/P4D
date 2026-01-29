@@ -1,3 +1,5 @@
+1) Defining columns and  missng value
+
 library(dplyr)
 library(tidyr)
 
@@ -43,7 +45,8 @@ score_hamd <- function(hamd,
     }
   }
 
-  # 5) Total score
+2) Calculating Total Score
+
   if (isTRUE(treat_other_na_as_zero)) {
     hamd_scored <- hamd_scored |>
       rowwise() |>
@@ -59,7 +62,7 @@ score_hamd <- function(hamd,
   hamd_scored
 }
 
-2) Calculating Delta 
+3) Calculating Delta 
 
 > diff_hamd <- hamd_scored %>%
 + 
@@ -79,7 +82,7 @@ score_hamd <- function(hamd,
 +         missing_followup = is.na(hamd24_score_followup),
 +         two_points_available = !(missing_baseline | missing_followup)
 
-3) Filter
+4) Filter
 
 filtered_hamd <- diff_hamd %>% filter(supplementalid %in% included_ids)
 
