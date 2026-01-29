@@ -158,7 +158,7 @@ n_distinct(med_comb25$supplementalid)
 > n_distinct(incl_analysis$supplementalid)
 [1] 94
 
------------- Filtering for patients with antidepressant treatment 
+------------ Filtering for patients with antidepressant treatment starting week 2
 
 AD <- c(
 +     "Agomelatin",
