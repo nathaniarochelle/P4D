@@ -1,0 +1,86 @@
+library(dplyr)
+library(tidyr)
+
+score_hamd <- function(hamd,
+                       id_col = "supplementalid",
+                       tp_col = "studyeventoid",
+                       treat_other_na_as_zero = FALSE,
+                       validate_ranges = TRUE,
+                       item_min = 0,
+                       item_max = 4) {
+  if (!is.data.frame(hamd)) stop("`hamd` must be a data.frame or tibble.")
+  if (!id_col %in% names(hamd)) stop("`id_col` not found: ", id_col)
+  if (!tp_col %in% names(hamd)) stop("`tp_col` not found: ", tp_col)
+
+  hamd_scored <- hamd
+
+  # 1) Items: hamd_01..hamd_24 + hamd_18a/18b
+  item_cols <- grep("^hamd_\\d{2}$|^hamd_18a$|^hamd_18b$", names(hamd_scored), value = TRUE)
+  if (length(item_cols) == 0) {
+    stop("No HAMD item columns found. Expect hamd_01..hamd_24 (+ hamd_18a/hamd_18b).")
+  }
+
+  # 2) Coerce to numeric
+  for (cn in item_cols) {
+    hamd_scored[[cn]] <- suppressWarnings(as.numeric(hamd_scored[[cn]]))
+  }
+
+  # 3) Special rule: hamd_18a NA -> 0
+  if ("hamd_18a" %in% names(hamd_scored)) {
+    hamd_scored[["hamd_18a"]] <- ifelse(is.na(hamd_scored[["hamd_18a"]]), 0, hamd_scored[["hamd_18a"]])
+  }
+
+  # 4) Optional range QC
+  if (isTRUE(validate_ranges)) {
+    bad_vals <- hamd_scored |>
+      mutate(.row_id = dplyr::row_number()) |>
+      pivot_longer(cols = all_of(item_cols), names_to = "item", values_to = "val") |>
+      filter(!is.na(val) & (val < item_min | val > item_max))
+    if (nrow(bad_vals) > 0) {
+      message( Range check: Found ", nrow(bad_vals),
+              " out-of-range values (", item_min, "..", item_max, "). See `bad_vals`.")
+      assign("bad_vals", bad_vals, envir = .GlobalEnv)
+    }
+  }
+
+  # 5) Total score
+  if (isTRUE(treat_other_na_as_zero)) {
+    hamd_scored <- hamd_scored |>
+      rowwise() |>
+      mutate(hamd24_score = sum(c_across(all_of(item_cols)), na.rm = TRUE)) |>
+      ungroup()
+  } else {
+    hamd_scored <- hamd_scored |>
+      rowwise() |>
+      mutate(hamd24_score = sum(c_across(all_of(item_cols)), na.rm = FALSE)) |>
+      ungroup()
+  }
+
+  hamd_scored
+}
+
+2) Calculating Delta 
+
+> diff_hamd <- hamd_scored %>%
++ 
++     filter(studyeventoid %in% c("e.mzp1", "e.mzp7")) %>%
++   
++     group_by(supplementalid, studyeventoid) %>%
++     summarize(hamd24_score = first(hamd24_score), .groups = "drop") %>%
++    
++     mutate(tp = ifelse(studyeventoid == "e.mzp1", "baseline", "followup")) %>%
++     select(supplementalid, tp, hamd24_score) %>%
++     pivot_wider(names_from = tp, values_from = hamd24_score,
++                 names_prefix = "hamd24_score_") %>%
++  
++     mutate(
++         hamd24_diff = hamd24_score_followup - hamd24_score_baseline,
++         missing_baseline = is.na(hamd24_score_baseline),
++         missing_followup = is.na(hamd24_score_followup),
++         two_points_available = !(missing_baseline | missing_followup)
+
+3) Filter
+
+filtered_hamd <- diff_hamd %>% filter(supplementalid %in% included_ids)
+
+> View(filtered_hamd)
