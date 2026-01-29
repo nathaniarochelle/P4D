@@ -32,19 +32,6 @@ score_hamd <- function(hamd,
     hamd_scored[["hamd_18a"]] <- ifelse(is.na(hamd_scored[["hamd_18a"]]), 0, hamd_scored[["hamd_18a"]])
   }
 
-  # 4) Optional range QC
-  if (isTRUE(validate_ranges)) {
-    bad_vals <- hamd_scored |>
-      mutate(.row_id = dplyr::row_number()) |>
-      pivot_longer(cols = all_of(item_cols), names_to = "item", values_to = "val") |>
-      filter(!is.na(val) & (val < item_min | val > item_max))
-    if (nrow(bad_vals) > 0) {
-      message( Range check: Found ", nrow(bad_vals),
-              " out-of-range values (", item_min, "..", item_max, "). See `bad_vals`.")
-      assign("bad_vals", bad_vals, envir = .GlobalEnv)
-    }
-  }
-
 2) Calculating Total Score
 
   if (isTRUE(treat_other_na_as_zero)) {
