@@ -51,23 +51,39 @@ score_hamd <- function(hamd,
 
 3) Calculating Delta 
 
-> diff_hamd <- hamd_scored %>%
-+ 
-+     filter(studyeventoid %in% c("e.mzp1", "e.mzp7")) %>%
-+   
-+     group_by(supplementalid, studyeventoid) %>%
-+     summarize(hamd24_score = first(hamd24_score), .groups = "drop") %>%
-+    
-+     mutate(tp = ifelse(studyeventoid == "e.mzp1", "baseline", "followup")) %>%
-+     select(supplementalid, tp, hamd24_score) %>%
-+     pivot_wider(names_from = tp, values_from = hamd24_score,
-+                 names_prefix = "hamd24_score_") %>%
-+  
+hamd_diff <- hamd_scored %>%
++     
++     # Keep all relevant timepoints
++     filter(studyeventoid %in% c("e.mzp1", "e.mzp3", "e.mzp4", "e.mzp5", "e.mzp6", "e.mzp7")) %>%
++     
++     # Order timepoints so the "latest" follow-up can be selected
 +     mutate(
-+         hamd24_diff = hamd24_score_followup - hamd24_score_baseline,
-+         missing_baseline = is.na(hamd24_score_baseline),
-+         missing_followup = is.na(hamd24_score_followup),
++         tp_order = case_when(
++             studyeventoid == "e.mzp1" ~ 1,
++             studyeventoid == "e.mzp3" ~ 3,
++             studyeventoid == "e.mzp4" ~ 4,
++             studyeventoid == "e.mzp5" ~ 5,
++             studyeventoid == "e.mzp6" ~ 6,
++             studyeventoid == "e.mzp7" ~ 7
++         )
++     ) %>%
++     
++     # Pick baseline (always e.mzp1) and latest follow‑up
++     group_by(supplementalid) %>%
++     summarize(
++         hamd24_baseline = hamd24_score[studyeventoid == "e.mzp1"][1],
++         # latest follow-up = maximum tp_order greater than baseline
++         hamd24_followup = hamd24_score[tp_order == max(tp_order[tp_order > 1])],
++         followup_event = studyeventoid[tp_order == max(tp_order[tp_order > 1])],
++         .groups = "drop"
++     ) %>%
++     
++     mutate(
++         hamd24_diff = hamd24_followup - hamd24_baseline,
++         missing_baseline = is.na(hamd24_baseline),
++         missing_followup = is.na(hamd24_followup),
 +         two_points_available = !(missing_baseline | missing_followup)
++     )
 
 4) Filter
 
