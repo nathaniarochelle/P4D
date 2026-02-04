@@ -1,0 +1,8 @@
+# Step 1: Select the item columns
+item_isi <- c("isi_01", "isi_02", "isi_03", "isi_04", "isi_05", "isi_06", "isi_07")   # <-- put your item names here
+
+# Step 2: Convert all selected columns to numeric
+isi[item_isi] <- lapply(isi[item_isi], function(x) as.numeric(as.character(x)))
+ 
+# Step 3: Compute total score across all item columns
+isi$total_score <- rowSums(isi[item_isi], na.rm = TRUE)
