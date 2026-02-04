@@ -1,0 +1,23 @@
+# Step 1. Define the 24 item names ----
+> items <- paste0("rrq_", sprintf("%02d", 1:24))
+> 
+# Step 2. Convert all items to numeric ----
+> rrq[items] <- lapply(rrq[items], function(x) as.numeric(as.character(x)))
+> 
+# Step 3. Reverse-code the negatively keyed items ----
+> # Negatively keyed items: 6, 9, 10, 13, 14, 17, 20, 24
+> neg_items <- c("rrq_06", "rrq_09", "rrq_10", "rrq_13",
++                "rrq_14", "rrq_17", "rrq_20", "rrq_24")
+> 
+# Reverse coding for 1–5 Likert scale: new = 6 - original
+> rrq[neg_items] <- lapply(rrq[neg_items], function(x) 6 - x)
+> 
+Step 4. Rumination score ----
+> # Rumination = Items 1–12, mean score
+> rumination_items <- paste0("rrq_", sprintf("%02d", 1:12))
+> rrq$Rumination <- rowMeans(rrq[rumination_items], na.rm = TRUE)
+> 
+Step 5. Reflection score ----
+> # Reflection = Items 13–24, mean score
+> reflection_items <- paste0("rrq_", sprintf("%02d", 13:24))
+> rrq$Reflection <- rowMeans(rrq[reflection_items], na.rm = TRUE)
