@@ -21,3 +21,28 @@ wrss0526$wrss_total <- rowSums(wrss0526[, wrss_items], na.rm = TRUE)
 wrss0526$IT   <- rowSums(wrss0526[, IT_items], na.rm = TRUE)
 wrss0526$DAWR <- rowSums(wrss0526[, DAWR_items], na.rm = TRUE)
 wrss0526$NAWR <- rowSums(wrss0526[, NAWR_items], na.rm = TRUE)
+
+library(dplyr)
+
+wrss_diff <- wrss0526 %>%
+  
+  # Keep only baseline and follow-up
+  filter(studyeventoid %in% c("e.mzp1_selbst", "e.mzp7_selbst")) %>%
+  
+  group_by(supplementalid) %>%
+  summarize(
+    # Baseline
+    wrss_baseline = wrss_total[studyeventoid == "e.mzp1_selbst"][1],
+    
+    # Follow-up
+    wrss_followup = wrss_total[studyeventoid == "e.mzp7_selbst"][1],
+    
+    .groups = "drop"
+  ) %>%
+  
+  mutate(
+    wrss_diff = wrss_followup - wrss_baseline,
+    missing_baseline = is.na(wrss_baseline),
+    missing_followup = is.na(wrss_followup),
+    two_points_available = !(missing_baseline | missing_followup)
+  )
