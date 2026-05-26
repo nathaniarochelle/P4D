@@ -1,0 +1,23 @@
+AWRS was shorten in the final version from an 18-item pool to 14-items. The numbering of the items follow the old 18-items version. 
+The categorization of the items: 
+ - Factor 1: inner tension/exhaustion -> 2,10,11,12,13,15,16 
+ - Factor 2: daytime AWR impairement -> 8, 9, 14 
+ - Factor 3: nocturnal AWR impairement -> 5,4,1,3 
+
+# ---- Define item groups ----
+
+# All WRSS items
+wrss_items <- paste0("wrss_", sprintf("%02d", 1:16))
+
+# Subscales
+IT_items   <- paste0("wrss_", sprintf("%02d", c(2,10,11,12,13,15,16)))  # Inner tension/exhaustion
+DAWR_items <- paste0("wrss_", sprintf("%02d", c(8,9,14)))               # Daytime AWR impairment
+NAWR_items <- paste0("wrss_", sprintf("%02d", c(5,4,1,3)))              # Nocturnal AWR impairment
+
+# ---- Calculate sum scores ----
+
+wrss0526$wrss_total <- rowSums(wrss0526[, wrss_items], na.rm = TRUE)
+
+wrss0526$IT   <- rowSums(wrss0526[, IT_items], na.rm = TRUE)
+wrss0526$DAWR <- rowSums(wrss0526[, DAWR_items], na.rm = TRUE)
+wrss0526$NAWR <- rowSums(wrss0526[, NAWR_items], na.rm = TRUE)
