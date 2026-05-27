@@ -203,3 +203,47 @@ clean NA: baseline_subscale_clean0526 <- na.omit(baseline_subscale) --> should p
 +     z = baseline_subscale_clean0526[, c("age", "gender")],
 +     method = "spearman"
 + )
+
+---- FOLLOW UP ---- 
+
+
+followup_subscale <- corr_subscale_clean0526 %>%
++     filter(studyeventoid == "e.mzp7")
+> library(dplyr)
+> 
+followup_subscale <- followup_subscale %>%
++     left_join(
++         anam0526 %>%
++             dplyr::select(supplementalid, ident_02, ident_06) %>%
++             dplyr::rename(
++                 age = ident_02,
++                 gender = ident_06
++             ),
++         by = "supplementalid"
++     )
+
+followup_subscale_clean0526 <- na.omit(followup_subscale)
+
+pcor_fu_IT <- pcor.test(
++     x = followup_subscale_clean0526$hamd24_score,
++     y = followup_subscale_clean0526$IT,
++     z = followup_subscale_clean0526[, c("age", "gender")],
++     method = "spearman"
++ )
+> 
+> pcor_fu_DAWR <- pcor.test(
++     x = followup_subscale_clean0526$hamd24_score,
++     y = followup_subscale_clean0526$DAWR,
++     z = followup_subscale_clean0526[, c("age", "gender")],
++     method = "spearman"
++ )
+> 
+> pcor_fu_NAWR <- pcor.test(
++     x = followup_subscale_clean0526$hamd24_score,
++     y = followup_subscale_clean0526$NAWR,
++     z = followup_subscale_clean0526[, c("age", "gender")],
++     method = "spearman"
++ )
+
+
+
