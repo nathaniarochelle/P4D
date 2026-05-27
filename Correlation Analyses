@@ -1,0 +1,205 @@
+1. HAMD-24 and AWRS at Baseline 
+
+# Join Data 
+library(tidyr)
+> library(dplyr)
+> 
+> corr_all0526 <- hamd_diff0526 %>%
++     
++     # Join WRSS data
++     left_join(wrss_diff0526, by = "supplementalid") %>%
++     
++     # Join anam data (select + rename in one step)
++     left_join(
++         anam0526 %>%
++             select(supplementalid, ident_02, ident_06) %>%
++             rename(
++                 age = ident_02,
++                 gender = ident_06
++             ),
++         by = "supplementalid"
++     )
+
+# Clean Data --> all NA omitted
+corr_all_clean0526 <- corr_all0526 %>%
++     dplyr::select(
++         hamd24_baseline,
++         wrss_baseline,
++         age,
++         gender
++     ) %>%
++     na.omit()
+
+# Partial Spearman Correlation -> control for age and gender
+
+library(ppcor)
+> 
+> pcor.test(
++     x = corr_all_clean0526$hamd24_baseline,
++     y = corr_all_clean0526$wrss_baseline,
++     z = as.matrix(corr_clean[, c("age", "gender")]),
++     method = "spearman"
++ )
+
+# Plot 
+library(ggpubr)
+> 
+> ggscatter(
++     corr_all_clean0526,
++     x = "hamd24_baseline",
++     y = "wrss_baseline",
++     color = "steelblue",
++     alpha = 0.6,
++     add = "reg.line",
++     add.params = list(color = "black")
++ ) +
++     labs(
++         x = "HAMD-24 Baseline",
++         y = "AWRS Baseline",
++         title = "Association between HAMD-24 and AWRS",
++         subtitle = "Partial Spearman correlation (adjusted for age and gender)"
++     ) +
++     annotate(
++         "text",
++         x = Inf, y = -Inf,
++         label = "partial rho = 0.33\np < .001",
++         hjust = 1.1, vjust = -0.5,
++         size = 5
++     ) +
++     theme_classic(base_size = 14)
+> ``
+
+2. Changes in HAMD and AWRS 
+
+#Clean Data and Omit NA
+corr_diff_clean0526 <- corr_all0526 %>%
++     dplyr::select(
++         hamd24_diff,
++         wrss_diff,
++         hamd24_baseline,
++         age,
++         gender
++     )
+
+corr_diff_clean0526 <- na.omit(corr_diff_clean0526)
+
+#Partial Spearman Correlation -> control for age, gender, depressive symptoms baseline 
+pcor.test(
++     x = corr_diff_clean0526$hamd24_diff,
++     y = corr_diff_clean0526$wrss_diff,
++     z = as.matrix(corr_diff_clean0526[, c("age", "gender", "hamd24_baseline")]),
++     method = "spearman"
++ )
+
+# Plot 
+> ggscatter(
++     corr_diff_clean0526,
++     x = "hamd24_diff",
++     y = "wrss_diff",
++     color = "steelblue",
++     alpha = 0.6,
++     add = "reg.line",
++     add.params = list(color = "black")
++ ) +
++     labs(
++         x = "HAMD-24 Changes",
++         y = "AWRS Changes",
++         title = "Association between Changes of HAMD-24 and AWRS Between Baseline and Follow-Up",
++         subtitle = "Partial Spearman correlation (adjusted for age, gender, baseline depressive symptoms)"
++     ) +
++     annotate(
++         "text",
++         x = Inf, y = -Inf,
++         label = "partial rho = 0.39\np < .001",
++         hjust = 1.1, vjust = -0.5,
++         size = 5
++     ) +
++     theme_classic(base_size = 14)
+> ggscatter(
++     corr_diff_clean0526,
++     x = "hamd24_diff",
++     y = "wrss_diff",
++     color = "steelblue",
++     alpha = 0.6,
++     add = "reg.line",
++     add.params = list(color = "black")
++ ) +
++     labs(
++         x = "HAMD-24 Changes",
++         y = "AWRS Changes",
++         title = "Association between Changes of HAMD-24 and AWRS",
++         subtitle = "Partial Spearman correlation (adjusted for age, gender, baseline depressive symptoms)"
++     ) +
++     annotate(
++         "text",
++         x = Inf, y = -Inf,
++         label = "partial rho = 0.39\np < .001",
++         hjust = 1.1, vjust = -0.5,
++         size = 5
++     ) +
++     theme_classic(base_size = 14)
+
+3. Subscales 
+
+# Left Join 
+wrss0526 <- wrss0526 %>%
++     mutate(studyeventoid = gsub("_selbst", "", studyeventoid))
+
+corr_subscale0526 <- hamd_scored0526 %>%
++     left_join(
++         wrss0526,
++         by = c("supplementalid", "studyeventoid")
++     )
+
+corr_subscale0526 <- corr_subscale0526 %>%
++     left_join(
++         anam0526 %>%
++             dplyr::select(supplementalid, studyeventoid, ident_02, ident_06) %>%
++             dplyr::rename(
++                 age = ident_02,
++                 gender = ident_06
++             ),
++         by = c("supplementalid", "studyeventoid")
++     )
+
+# Clean Up Data -> Omit NA
+corr_subscale_clean0526 <- corr_subscale0526 %>%
++     dplyr::select(
++         supplementalid,
++         studyeventoid,
++         hamd24_score,
++         IT,
++         DAWR,
++         NAWR,
++         age,
++         gender
++     )
+
+# Correlation Analyses 
+---- BASELINE ----
+
+baseline_subscale <- corr_subscale_clean0526 %>%
+filter(studyeventoid == "e.mzp1")
+
+clean NA: baseline_subscale_clean0526 <- na.omit(baseline_subscale) --> should probably be combined in the step before!!
+
+ pcor_base_IT <- pcor.test(
++     x = baseline_subscale_clean0526$hamd24_score,
++     y = baseline_subscale_clean0526$IT,
++     z = baseline_subscale_clean0526[, c("age", "gender")],
++     method = "spearman"
++ )
+> 
+> pcor_base_DAWR <- pcor.test(
++     x = baseline_subscale_clean0526$hamd24_score,
++     y = baseline_subscale_clean0526$DAWR,
++     z = baseline_subscale_clean0526[, c("age", "gender")],
++     method = "spearman"
++ )
+> 
+> pcor_base_NAWR <- pcor.test(
++     x = baseline_subscale_clean0526$hamd24_score,
++     y = baseline_subscale_clean0526$NAWR,
++     z = baseline_subscale_clean0526[, c("age", "gender")],
++     method = "spearman"
++ )
