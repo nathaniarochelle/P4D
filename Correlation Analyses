@@ -42,33 +42,47 @@ library(ppcor)
 + )
 
 # Plot 
-library(ggpubr)
-> 
-> ggscatter(
-+     corr_all_clean0526,
-+     x = "hamd24_baseline",
-+     y = "wrss_baseline",
-+     color = "steelblue",
-+     alpha = 0.6,
-+     add = "reg.line",
-+     add.params = list(color = "black")
-+ ) +
-+     labs(
-+         x = "HAMD-24 Baseline",
-+         y = "AWRS Baseline",
-+         title = "Association between HAMD-24 and AWRS",
-+         subtitle = "Partial Spearman correlation (adjusted for age and gender)"
-+     ) +
-+     annotate(
-+         "text",
-+         x = Inf, y = -Inf,
-+         label = "partial rho = 0.33\np < .001",
-+         hjust = 1.1, vjust = -0.5,
-+         size = 5
-+     ) +
-+     theme_classic(base_size = 14)
-> ``
+library(ggplot2)
 
+ggplot(
+  corr_all_clean0526,
+  aes(x = hamd24_baseline, y = wrss_baseline)
+) +
+  geom_point(
+    color = "#343981",
+    alpha = 0.7,
+    size = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    color = "red",
+    fill = "#F4A6A6",   # light red confidence band
+    linewidth = 2,
+    se = TRUE
+  ) +
+  annotate(
+    "label",
+    x = Inf,
+    y = -Inf,
+    label = "Partial Spearman rho = 0.32\np < .001",
+    hjust = 1.05,
+    vjust = -0.5,
+    size = 4.5,
+    label.size = 0.3
+  ) +
+  labs(
+    title = "Association between HDRS-24 and AWRS",
+    subtitle = "Partial Spearman correlation adjusted for age and gender",
+    x = "HDRS-24 Baseline",
+    y = "AWRS Baseline"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "grey40"),
+    axis.title = element_text(face = "bold")
+  )
 2. Changes in HAMD and AWRS 
 
 #Clean Data and Omit NA
@@ -92,52 +106,48 @@ pcor.test(
 + )
 
 # Plot 
-> ggscatter(
-+     corr_diff_clean0526,
-+     x = "hamd24_diff",
-+     y = "wrss_diff",
-+     color = "steelblue",
-+     alpha = 0.6,
-+     add = "reg.line",
-+     add.params = list(color = "black")
-+ ) +
-+     labs(
-+         x = "HAMD-24 Changes",
-+         y = "AWRS Changes",
-+         title = "Association between Changes of HAMD-24 and AWRS Between Baseline and Follow-Up",
-+         subtitle = "Partial Spearman correlation (adjusted for age, gender, baseline depressive symptoms)"
-+     ) +
-+     annotate(
-+         "text",
-+         x = Inf, y = -Inf,
-+         label = "partial rho = 0.39\np < .001",
-+         hjust = 1.1, vjust = -0.5,
-+         size = 5
-+     ) +
-+     theme_classic(base_size = 14)
-> ggscatter(
-+     corr_diff_clean0526,
-+     x = "hamd24_diff",
-+     y = "wrss_diff",
-+     color = "steelblue",
-+     alpha = 0.6,
-+     add = "reg.line",
-+     add.params = list(color = "black")
-+ ) +
-+     labs(
-+         x = "HAMD-24 Changes",
-+         y = "AWRS Changes",
-+         title = "Association between Changes of HAMD-24 and AWRS",
-+         subtitle = "Partial Spearman correlation (adjusted for age, gender, baseline depressive symptoms)"
-+     ) +
-+     annotate(
-+         "text",
-+         x = Inf, y = -Inf,
-+         label = "partial rho = 0.39\np < .001",
-+         hjust = 1.1, vjust = -0.5,
-+         size = 5
-+     ) +
-+     theme_classic(base_size = 14)
+library(ggplot2)
+
+ggplot(
+  corr_diff_clean0526,
+  aes(x = hamd24_diff, y = wrss_diff)
+) +
+  geom_point(
+    color = "#343981",
+    alpha = 0.7,
+    size = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    color = "red",
+    fill = "#F4A6A6",
+    alpha = 0.25,
+    linewidth = 2,
+    se = TRUE
+  ) +
+  annotate(
+    "label",
+    x = Inf,
+    y = -Inf,
+    label = "Partial Spearman rho = 0.39\np < .001",
+    hjust = 1.05,
+    vjust = -0.5,
+    size = 4.5,
+    label.size = 0.3
+  ) +
+  labs(
+    title = "Association between Changes of HAMD-24 and AWRS",
+    subtitle = "Partial Spearman correlation adjusted for age, gender, and baseline depressive symptoms",
+    x = "HAMD-24 Changes",
+    y = "AWRS Changes"
+  ) +
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "grey40"),
+    axis.title = element_text(face = "bold")
+  )
 
 3. Subscales 
 
