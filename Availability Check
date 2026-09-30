@@ -1,0 +1,34 @@
+AD_ids <- incl_analysis926_AD %>%
+  distinct(supplementalid)
+
+hamd_avail <- AD_ids %>%
+  inner_join(
+    hamd926 %>%
+      select(supplementalid, studyeventoid) %>%
+      distinct() %>%
+      mutate(HAMD = 1),
+    by = "supplementalid"
+  )
+
+wrss_avail <- AD_ids %>%
+  inner_join(
+    wrss926 %>%
+      select(supplementalid, studyeventoid) %>%
+      distinct() %>%
+      mutate(
+        studyeventoid = gsub("_selbst$", "", studyeventoid),
+        WRSS = 1
+      ),
+    by = "supplementalid"
+  )
+
+availability <- full_join(
+  hamd_avail,
+  wrss_avail,
+  by = c("supplementalid", "studyeventoid")
+) %>%
+  mutate(
+    HAMD = ifelse(is.na(HAMD), 0, HAMD),
+    WRSS = ifelse(is.na(WRSS), 0, WRSS)
+  ) %>%
+  arrange(supplementalid, studyeventoid)
