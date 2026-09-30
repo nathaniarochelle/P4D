@@ -1,72 +1,77 @@
 1. Import and clean 
-med_yn25 <- med_yn25 %>%
-+     mutate(
-+         # ---- IDs & keys (must match exactly for joins) ----
-+         supplementalid       = str_trim(as.character(supplementalid)),
-+         studyeventoid        = str_trim(as.character(studyeventoid)),
-+         studyeventrepeatkey  = str_trim(as.character(studyeventrepeatkey)),
-+         formoid              = str_trim(as.character(formoid)),
-+         formrepeatkey        = str_trim(as.character(formrepeatkey)),
-+         itemgroupoid         = str_trim(as.character(itemgroupoid)),
-+         itemgrouprepeatkey   = str_trim(as.character(itemgrouprepeatkey)),
-+         itemgrouppk          = str_trim(as.character(itemgrouppk)),
-+         subjectkey           = str_trim(as.character(subjectkey)),
-+         
-+         # ---- Dates ----
-+         md_dt      = as_date(md_dt),
-+         arc_md_dt  = as_date(arc_md_dt),
-+         
-+         # ---- Yes / No medication flag ----
-+         md_yn = case_when(
-+             md_yn %in% c("Y", "YES", "Yes", "yes", "1") ~ "Y",
-+             md_yn %in% c("N", "NO", "No", "no", "0")    ~ "N",
-+             TRUE                                       ~ NA_character_
-+         )
-+     )
+library(dplyr)
+library(stringr)
+library(lubridate)
 
-> med_rep25 <- med_rep25 %>%
-+     mutate(
-+         # IDs as character
-+         supplementalid      = as.character(supplementalid),
-+         studyeventoid       = as.character(studyeventoid),
-+         studyeventrepeatkey = as.character(studyeventrepeatkey),
-+         formoid             = as.character(formoid),
-+         formrepeatkey       = as.character(formrepeatkey),
-+         itemgroupoid        = as.character(itemgroupoid),
-+         itemgrouprepeatkey  = as.character(itemgrouprepeatkey),
-+         itemgrouppk         = as.character(itemgrouppk),
-+         subjectkey          = as.character(subjectkey),
-+         
-+         # Medication name: trim spaces
-+         md_name             = str_squish(md_name),
-+         
-+         # Dose and units: numeric where possible
-+         md_dose             = as.numeric(md_dose),
-+         arc_md_dose         = as.numeric(arc_md_dose),
-+         md_unit             = str_squish(md_unit),
-+         arc_md_unit         = str_squish(arc_md_unit),
-+         
-+         # Application and frequency
-+         md_appli            = str_squish(md_appli),
-+         md_daily            = as.numeric(md_daily),
-+         md_inter            = as.numeric(md_inter),
-+         arc_md_inter        = as.numeric(arc_md_inter),
-+         
-+         # TDM values
-+         md_tdmw             = as.numeric(md_tdmw),
-+         mu_md_tdmw          = str_squish(mu_md_tdmw),
-+         arc_md_tdmw         = as.numeric(arc_md_tdmw),
-+         
-+         md_tdmm             = as.numeric(md_tdmm),
-+         mu_md_tdmm          = str_squish(mu_md_tdmm),
-+         arc_md_tdmm         = as.numeric(arc_md_tdmm),
-+         
-+         md_tdmsu            = as.numeric(md_tdmsu),
-+         mu_md_tdmsu         = str_squish(mu_md_tdmsu),
-+         arc_md_tdmsu        = as.numeric(arc_md_tdmsu),
-+         
-+         md_tdmb             = as.numeric(md_tdmb)
-+     )
+med_yn926 <- med_yn926 %>%
+  mutate(
+    # IDs & keys
+    supplementalid      = str_trim(as.character(supplementalid)),
+    studyeventoid       = str_trim(as.character(studyeventoid)),
+    studyeventrepeatkey = str_trim(as.character(studyeventrepeatkey)),
+    formoid             = str_trim(as.character(formoid)),
+    formrepeatkey       = str_trim(as.character(formrepeatkey)),
+    itemgroupoid        = str_trim(as.character(itemgroupoid)),
+    itemgrouprepeatkey  = str_trim(as.character(itemgrouprepeatkey)),
+    itemgrouppk         = str_trim(as.character(itemgrouppk)),
+    subjectkey          = str_trim(as.character(subjectkey)),
+
+    # Dates
+    md_dt     = as_date(md_dt),
+    arc_md_dt = as_date(arc_md_dt),
+
+    # Yes / No medication flag
+    md_yn = case_when(
+      toupper(str_trim(as.character(md_yn))) %in% c("Y", "YES", "1") ~ "Y",
+      toupper(str_trim(as.character(md_yn))) %in% c("N", "NO", "0")  ~ "N",
+      TRUE ~ NA_character_
+    )
+  )
+
+
+med_rep926 <- med_rep926 %>%
+  mutate(
+    # IDs as character
+    supplementalid      = str_trim(as.character(supplementalid)),
+    studyeventoid       = str_trim(as.character(studyeventoid)),
+    studyeventrepeatkey = str_trim(as.character(studyeventrepeatkey)),
+    formoid             = str_trim(as.character(formoid)),
+    formrepeatkey       = str_trim(as.character(formrepeatkey)),
+    itemgroupoid        = str_trim(as.character(itemgroupoid)),
+    itemgrouprepeatkey  = str_trim(as.character(itemgrouprepeatkey)),
+    itemgrouppk         = str_trim(as.character(itemgrouppk)),
+    subjectkey          = str_trim(as.character(subjectkey)),
+
+    # Medication name
+    md_name             = str_squish(as.character(md_name)),
+
+    # Dose and units
+    md_dose             = as.numeric(md_dose),
+    arc_md_dose         = as.numeric(arc_md_dose),
+    md_unit             = str_squish(as.character(md_unit)),
+    arc_md_unit         = str_squish(as.character(arc_md_unit)),
+
+    # Application and frequency
+    md_appli            = str_squish(as.character(md_appli)),
+    md_daily            = as.numeric(md_daily),
+    md_inter            = as.numeric(md_inter),
+    arc_md_inter        = as.numeric(arc_md_inter),
+
+    # TDM values
+    md_tdmw             = as.numeric(md_tdmw),
+    mu_md_tdmw          = str_squish(as.character(mu_md_tdmw)),
+    arc_md_tdmw         = as.numeric(arc_md_tdmw),
+
+    md_tdmm             = as.numeric(md_tdmm),
+    mu_md_tdmm          = str_squish(as.character(mu_md_tdmm)),
+    arc_md_tdmm         = as.numeric(arc_md_tdmm),
+
+    md_tdmsu            = as.numeric(md_tdmsu),
+    mu_md_tdmsu         = str_squish(as.character(mu_md_tdmsu)),
+    arc_md_tdmsu        = as.numeric(arc_md_tdmsu),
+
+    md_tdmb             = as.numeric(md_tdmb)
+  )
 
 decode <- med_decode %>%
 +     
@@ -78,11 +83,11 @@ decode <- med_decode %>%
 +     distinct(med_code, .keep_all = TRUE)
 
 2. Merge + Decode 
-med_rep25 <- med_rep25 %>%
+med_rep926 <- med_rep926 %>%
 +     left_join(decode, by = c("md_name" = "med_code"))
 
-med_comb25 <- med_yn25 %>%
-+     left_join(med_rep25,
+med_comb926 <- med_yn926 %>%
++     left_join(med_rep926,
 +         by = c("supplementalid", "studyeventoid"))
 
 3. Define excluded medication
@@ -131,31 +136,29 @@ med_comb25 <- med_yn25 %>%
 +     "Prothipendyl",
 +     "Zolpidem")
 
-4. Decide eligibility at baseline only
-incl_baseline <- med_comb25 %>%
-+     filter(studyeventoid == "e.mzp1") %>%
-+     group_by(supplementalid) %>%
-+     summarise(
-+         eligible =
-+             all(is.na(med_name)) |
-+             !any(med_name %in% AD_SM, na.rm = TRUE),
-+         .groups = "drop"
-+     ) %>%
-+     filter(eligible) %>%
-+     pull(supplementalid)
+There is also AD_SM_PS
 
-print (incl_baseline)
+4. Decide eligibility at baseline only + Apply eligibility to full dataset
+incl_analysis926 <- med_comb926 %>%
+  inner_join(
+    med_comb926 %>%
+      filter(studyeventoid == "e.mzp1") %>%
+      group_by(supplementalid) %>%
+      summarise(
+        eligible = all(is.na(med_name)) |
+          !any(med_name %in% AD_SM_PS, na.rm = TRUE),
+        .groups = "drop"
+      ) %>%
+      filter(eligible) %>%
+      select(supplementalid),
+    by = "supplementalid"
+  )
 
-5. Apply eligbility to full dataset 
+5. Sanity checks
 
-incl_analysis <- med_comb25 %>%
-+     filter(supplementalid %in% incl_baseline)
-
-6. Sanity checks
-
-n_distinct(med_comb25$supplementalid)
+n_distinct(med_comb926$supplementalid)
 [1] 589
-> n_distinct(incl_analysis$supplementalid)
+> n_distinct(incl_analysis926$supplementalid)
 [1] 94
 
 ------------ Filtering for patients with antidepressant treatment starting week 2
@@ -187,7 +190,13 @@ AD <- c(
 +     "Trazodon",
 +     "Venlafaxin"
 
-included_ids <- incl_analysis1 %>%
-filter(studyeventoid %in% c("e.mzp2", "e.mzp3", "e.mzp4", "e.mzp5", "e.mzp6", "e.mzp7"),
-is_antidepressant) %>%
-distinct(supplementalid)
+incl_analysis926_AD <- incl_analysis926 %>%
+  semi_join(
+    incl_analysis926 %>%
+      filter(
+        studyeventoid %in% paste0("e.mzp", 2:7),
+        md_name %in% AD
+      ) %>%
+      distinct(supplementalid),
+    by = "supplementalid"
+  )
